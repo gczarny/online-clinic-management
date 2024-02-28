@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class ClinicUserDTO {
 
-    private Long patientId;
+    private Long clinicUserId;
     private String userName;
     private String email;
     private String phone;

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,6 +15,6 @@ public class DoctorDTO {
     private Long doctorId;
     private String firstName;
     private String lastName;
-    private SpecialtyDTO specialty;
+    private Set<SpecialtyDTO> specialties;
     private ClinicUserDTO clinicUser;
 }

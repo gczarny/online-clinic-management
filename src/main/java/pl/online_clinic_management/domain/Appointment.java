@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 @Value
 @Builder
 @EqualsAndHashCode(of = {"appointmentId", "reason"})
-@ToString(of = {"appointmentId", "appointmentDate", "status", "reason", "patient", "doctor"})
+@ToString(of = {"appointmentId", "appointmentDate", "status", "reason"})
 public class Appointment {
 
     Long appointmentId;

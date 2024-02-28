@@ -69,9 +69,8 @@ public class PatientController {
         List<AppointmentDTO> appointments = appointmentService.findByPatientId(patient.getPatientId()).stream()
                 .map(appointmentMapper::map)
                 .toList();
-
+        //log.info("Appointments: {}", appointments);
         model.addAttribute("appointmentsDTO", appointments);
-        model.addAttribute("appointmentDTO", new AppointmentDTO());
         return "patient_appointment";
     }
 
@@ -81,6 +80,9 @@ public class PatientController {
 //            BindingResult result,
 //            ModelMap model
 //    ){
+//        if (result.hasErrors()) {
+//            return "patient_appointment"; // or whatever your view name is
+//        }
 //        List<SpecialtyDTO> specialtiesDTO = specialtyService.findAll().stream()
 //                .map(specialtyMapper::map)
 //                .toList();

@@ -19,6 +19,6 @@ public class AppointmentDTO {
     OffsetDateTime appointmentDate;
     String status;
     String reason;
-    Patient patient;
-    Doctor doctor;
+    PatientDTO patient;
+    DoctorDTO doctor;
 }
