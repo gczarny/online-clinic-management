@@ -9,8 +9,8 @@ import pl.online_clinic_management.domain.exception.NotFoundException;
 
 import java.util.Optional;
 
-@Service
 @AllArgsConstructor
+@Service
 public class PatientService {
 
     private final PatientDAO patientDAO;

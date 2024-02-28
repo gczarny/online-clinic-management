@@ -24,6 +24,6 @@ public class MedicalNoteEntity {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "appointment_id", nullable = false)
+    @JoinColumn(name = "appointment_id")
     private AppointmentEntity appointment;
 }

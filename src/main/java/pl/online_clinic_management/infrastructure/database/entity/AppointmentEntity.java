@@ -3,6 +3,8 @@ package pl.online_clinic_management.infrastructure.database.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @EqualsAndHashCode(of = "appointmentId")
@@ -28,11 +30,14 @@ public class AppointmentEntity {
     @Column(name = "reason")
     private String reason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "patient_id", nullable = false)
     private PatientEntity patient;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "doctor_id", nullable = false)
     private DoctorEntity doctor;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "appointment")
+    private Set<MedicalNoteEntity> medicalNotes;
 }

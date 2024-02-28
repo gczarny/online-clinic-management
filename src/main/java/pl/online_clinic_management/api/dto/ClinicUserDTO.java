@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.online_clinic_management.domain.Role;
 
 import java.util.Set;
 
@@ -19,5 +20,5 @@ public class ClinicUserDTO {
     private String phone;
     private Boolean active;
     private AddressDTO address;
-    private Set<String> role;
+    private Set<Role> role;
 }

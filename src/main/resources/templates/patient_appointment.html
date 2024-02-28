@@ -43,32 +43,89 @@
             </div>
             <div class="col-md-10">
                 <div class="container-fluid">
-                    <table class="table">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>Appointment Date</th>
-                            <th>Status</th>
-                            <th>Reason</th>
-                            <th>Doctor</th>
-                            <th>Specialization</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="appointment : ${appointmentDTO}">
-                            <td th:text="${appointment.appointmentDate}"></td>
-                            <td th:text="${appointment.status}"></td>
-                            <td th:text="${appointment.reason}"></td>
-                            <td th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}"></td>
-                            <td th:text="${appointment.doctor.specialization}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="row mt-3">
+                        <table class="table">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>Appointment Date</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="appointment : ${appointmentsDTO}">
+                                <td th:text="${appointment.appointmentDate}"></td>
+                                <td th:text="${appointment.status}"></td>
+                                <td th:text="${appointment.reason}"></td>
+                                <td th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}"></td>
+                                <td th:text="${appointment.doctor.getSpecialties}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                   <div class="row">
+                        <div class="col-md-6">
+                            <form action="#" th:action="@{/patient/patient_appointment}" method="post" th:object="${appointmentDTO}">
+                                <h2>Make an appointment!</h2>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label for="appointmentDate">Appointment Date:</label>
+                                        <input type="datetime-local" id="appointmentDate" th:field="*{appointmentDate}">
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label for="reason">Reason:</label>
+                                        <input type="text" id="reason" th:field="*{reason}">
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <select id="specialty" th:field="*{specialty}">
+                                            <option th:each="specialty : ${specialtiesDTO}" th:value="${specialty.name}" th:text="${specialty.name}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <select id="doctor" th:field="*{doctor.doctorId}">
+                                            <option th:each="specialty : ${specialtiesDTO}" th:value="${specialty.name}" th:text="${specialty.name}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-primary">Make an appointment</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function () {  // ensures the script runs after page load
+        $('#specialty').change(function () {  // jQuery change function
+            var specialty = $(this).val();  // gets selected value of the specialty dropdown
+            var doctors = /*[[${specialtyToDoctors}]]*/;  // gets the specialty-to-doctors map
 
+            // Clear doctors dropdown
+            $('#doctor').empty();
+
+            // Fetch respective doctors from the map and append to the doctors dropdown
+            doctors[specialty].forEach(function (doctor) {
+                $('#doctor').append(new Option(doctor.name, doctor.doctorId));
+            });
+        });
+    });
+    /*]]>*/
+</script>
 </body>
 
 </html>

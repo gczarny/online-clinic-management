@@ -21,8 +21,8 @@ VALUES (1, 3),
        (2, 2),
        (3, 3);
 
-INSERT INTO doctor (doctor_id, first_name, last_name, specialization, user_id)
-VALUES (1, 'Marcelina', 'Marcowa', 'Cardiology', 2);
+INSERT INTO doctor (doctor_id, first_name, last_name, user_id)
+VALUES (1, 'Marcelina', 'Marcowa', 2);
 
 INSERT INTO patient (patient_id, first_name, last_name, pesel, user_id)
 VALUES (1, 'Janusz', 'Testowy', '21345678911', 1);
@@ -38,7 +38,7 @@ VALUES (1, '2023-01-15 09:00:00+00', 'scheduled', 'Routine checkup', 1, 1),
        (2, '2023-01-16 09:00:00+00', 'scheduled', 'Sick', 2, 1);
 
 INSERT INTO medical_note (content, appointment_id)
-VALUES ('PatientEntity in good health, no issues found.', 1),
+VALUES ('', 1),
        ('PatientEntity has a cold, prescribed medication.', 2);
 
 

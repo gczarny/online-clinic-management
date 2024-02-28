@@ -9,8 +9,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(of = "doctorId")
-@ToString(of = {"doctorId", "firstName", "lastName", "specialization"})
+@EqualsAndHashCode(of = {"doctorId", "firstName", "lastName"})
+@ToString(of = {"doctorId", "firstName", "lastName", "specialties"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -28,12 +28,16 @@ public class DoctorEntity {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "specialization")
-    private String specialization;
-
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private ClinicUserEntity user;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "doctor_specialty",
+            joinColumns = @JoinColumn(name = "doctor_id"),
+            inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+    private Set<SpecialtyEntity> specialties;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "doctor")
     private Set<DoctorAvailabilityEntity> doctorAvailabilities;

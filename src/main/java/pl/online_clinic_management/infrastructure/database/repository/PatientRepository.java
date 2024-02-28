@@ -10,8 +10,8 @@ import pl.online_clinic_management.infrastructure.database.repository.mapper.Pat
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 @AllArgsConstructor
+@Repository
 public class PatientRepository implements PatientDAO {
 
     private final PatientJpaRepository patientJpaRepository;

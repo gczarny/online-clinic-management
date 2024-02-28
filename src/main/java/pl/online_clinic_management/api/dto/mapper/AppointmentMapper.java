@@ -8,4 +8,5 @@ import pl.online_clinic_management.domain.Appointment;
 public interface AppointmentMapper {
 
     AppointmentDTO map(final Appointment appointment);
+    Appointment map(final AppointmentDTO appointmentDTO);
 }
