@@ -6,7 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import pl.online_clinic_management.infrastructure.database.entity.AddressEntity;
+import pl.online_clinic_management.infrastructure.database.entity.DoctorEntity;
+import pl.online_clinic_management.infrastructure.database.entity.PatientEntity;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Data
@@ -15,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "clinic_user")
-public class UserEntity {
+public class ClinicUserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +42,10 @@ public class UserEntity {
     @Column(name = "active")
     private Boolean active;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id")
+    private AddressEntity address;
+
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name = "user_role",
@@ -45,4 +53,11 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<RoleEntity> roles;
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
+    private DoctorEntity doctor;
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
+    private PatientEntity patient;
+
 }
