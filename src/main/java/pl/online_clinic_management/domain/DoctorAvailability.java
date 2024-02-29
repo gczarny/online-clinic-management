@@ -4,6 +4,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @With
 @Value
@@ -19,4 +21,5 @@ public class DoctorAvailability {
     LocalDate dateRangeEnd;
     String status;
     Doctor doctor;
+
 }

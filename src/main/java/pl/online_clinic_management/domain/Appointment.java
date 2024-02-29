@@ -2,6 +2,7 @@ package pl.online_clinic_management.domain;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @With
@@ -12,7 +13,7 @@ import java.time.OffsetDateTime;
 public class Appointment {
 
     Long appointmentId;
-    OffsetDateTime appointmentDate;
+    LocalDateTime appointmentDate;
     String status;
     String reason;
     Patient patient;

@@ -58,4 +58,5 @@ public class GlobalExceptionHandler {
         modelAndView.addObject("errorMessage", message);
         return modelAndView;
     }
+
 }

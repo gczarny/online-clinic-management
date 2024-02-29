@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import pl.online_clinic_management.domain.Doctor;
 import pl.online_clinic_management.domain.Patient;
 
-import java.time.OffsetDateTime;
+import java.time.*;
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ import java.time.OffsetDateTime;
 public class AppointmentDTO {
 
     Long appointmentId;
-    OffsetDateTime appointmentDate;
+    LocalDateTime appointmentDate;
     String status;
     String reason;
     PatientDTO patient;

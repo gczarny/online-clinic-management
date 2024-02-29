@@ -8,6 +8,8 @@ import pl.online_clinic_management.business.dao.AppointmentDAO;
 import pl.online_clinic_management.domain.Appointment;
 import pl.online_clinic_management.domain.exception.NotFoundException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,12 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentDAO.findByDoctorId(doctorId);
 
         log.info("Found for doctors appointments: [{}]", appointments.size());
+        return appointments;
+    }
+
+    public List<Appointment> findByDoctorIdAndDate(Long doctorId, LocalDateTime date) {
+        List<Appointment> appointments = appointmentDAO.findByDoctorIdAndDate(doctorId, date);
+        log.info("Found for doctor appointments: [{}]", appointments.size());
         return appointments;
     }
 }
