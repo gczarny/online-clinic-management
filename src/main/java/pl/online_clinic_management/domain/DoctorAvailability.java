@@ -2,21 +2,21 @@ package pl.online_clinic_management.domain;
 
 import lombok.*;
 
-import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @With
 @Value
 @Builder
-@EqualsAndHashCode(of = {"doctor_availability_id", "available_from", "available_until", "date_range_start", "date_range_end", "status", "doctor"})
-@ToString(of = {"doctor_availability_id", "available_from", "available_until", "date_range_start", "date_range_end", "status", "doctor"})
+@EqualsAndHashCode(of = {"doctorAvailabilityId", "doctor"})
+@ToString(of = {"doctorAvailabilityId", "availableFrom", "availableUntil", "dateRangeStart", "dateRangeEnd", "status", "doctor"})
 public class DoctorAvailability {
 
-    Long doctor_availability_id;
-    Time available_from;
-    Time available_until;
-    Date date_range_start;
-    Date date_range_end;
+    Long doctorAvailabilityId;
+    LocalTime availableFrom;
+    LocalTime availableUntil;
+    LocalDate dateRangeStart;
+    LocalDate dateRangeEnd;
     String status;
     Doctor doctor;
 }

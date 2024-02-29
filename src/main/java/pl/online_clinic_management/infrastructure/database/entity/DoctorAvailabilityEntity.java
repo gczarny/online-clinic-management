@@ -6,6 +6,8 @@ import org.hibernate.validator.constraints.Length;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -25,16 +27,16 @@ public class DoctorAvailabilityEntity {
     private Long doctorAvailabilityId;
 
     @Column(name = "available_from")
-    private Time availableFrom;
+    private LocalTime availableFrom;
 
     @Column(name = "available_until")
-    private Time availableUntil;
+    private LocalTime availableUntil;
 
     @Column(name = "date_range_start")
-    private Date dateRangeStart;
+    private LocalDate dateRangeStart;
 
     @Column(name = "date_range_end")
-    private Date dateRangeEnd;
+    private LocalDate dateRangeEnd;
 
     @Column(name = "status")
     @Length(min = 1, max = 20)

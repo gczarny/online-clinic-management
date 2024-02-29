@@ -3,6 +3,7 @@ package pl.online_clinic_management.infrastructure.database.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 @Getter
@@ -22,7 +23,7 @@ public class AppointmentEntity {
     private Long appointmentId;
 
     @Column(name = "appointment_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private java.time.OffsetDateTime appointmentDate;
+    private OffsetDateTime appointmentDate;
 
     @Column(name = "status")
     private String status;

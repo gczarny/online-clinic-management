@@ -57,7 +57,6 @@
                                 <th>Status</th>
                                 <th>Reason</th>
                                 <th>Doctor</th>
-                                <th>Specialization</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -66,7 +65,6 @@
                                 <td th:text="${appointment.status}"></td>
                                 <td th:text="${appointment.reason}"></td>
                                 <td th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}"></td>
-                                <td th:text="${appointment.doctor.getSpecialties}"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -112,6 +110,16 @@
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                        <div class="col-md-6">
+                            <ul th:each="doctorEntry : ${doctorToAvailabilities}">
+                                <li>
+                                    <span th:text="${doctorDTOMap[doctorEntry.key].firstName} + ' ' + ${doctorDTOMap[doctorEntry.key].lastName}"></span>
+                                    <ul th:each="availability : ${doctorEntry.value}">
+                                        <li th:text="${availability.dateRangeStart} + ' - ' + ${availability.dateRangeEnd}"></li>
+                                    </ul>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>

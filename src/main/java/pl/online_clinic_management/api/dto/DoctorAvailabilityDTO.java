@@ -1,17 +1,24 @@
 package pl.online_clinic_management.api.dto;
 
-import pl.online_clinic_management.domain.Doctor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorAvailabilityDTO {
 
-    Long doctor_availability_id;
-    Time available_from;
-    Time available_until;
-    Date date_range_start;
-    Date date_range_end;
+    Long doctorAvailabilityId;
+    LocalTime availableFrom;
+    LocalTime availableUntil;
+    LocalDate dateRangeStart;
+    LocalDate dateRangeEnd;
     String status;
-    Doctor doctor;
+    DoctorDTO doctor;
 }

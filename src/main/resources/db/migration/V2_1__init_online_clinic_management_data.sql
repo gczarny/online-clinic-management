@@ -66,3 +66,4 @@ VALUES ('', 1),
 
 INSERT INTO patient_history (date, notes, patient_id)
 VALUES ('2023-01-16', 'Cold, medication taken', 4);
+
