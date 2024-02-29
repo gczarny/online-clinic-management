@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
 import pl.online_clinic_management.api.dto.AppointmentDTO;
 import pl.online_clinic_management.api.dto.DoctorDTO;
 import pl.online_clinic_management.api.dto.PatientDTO;
@@ -31,8 +32,9 @@ import pl.online_clinic_management.domain.Patient;
 import pl.online_clinic_management.infrastructure.security.OnlineClinicManagementUserDetailsService;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -64,47 +66,34 @@ public class PatientController {
     }
 
     @GetMapping(value = PATIENT_APPOINTMENT)
-    public String appointmentPage(Principal principal, Model model) {
+    public ModelAndView appointmentPage(Principal principal, Model model) {
         Patient patient = getPatient(principal);
-        List<AppointmentDTO> appointments = appointmentService.findByPatientId(patient.getPatientId()).stream()
-                .map(appointmentMapper::map)
-                .toList();
-        //log.info("Appointments: {}", appointments);
-        model.addAttribute("appointmentsDTO", appointments);
-        return "patient_appointment";
-    }
-
-//    @PostMapping(value = PATIENT_APPOINTMENT)
-//    public String makeAppointment(
-//            @Valid @ModelAttribute("appointmentDTO") AppointmentDTO appointmentDTO,
-//            BindingResult result,
-//            ModelMap model
-//    ){
-//        if (result.hasErrors()) {
-//            return "patient_appointment"; // or whatever your view name is
-//        }
-//        List<SpecialtyDTO> specialtiesDTO = specialtyService.findAll().stream()
-//                .map(specialtyMapper::map)
-//                .toList();
-//        log.info("Specialties: {}", specialtiesDTO);
-//
-//        List<DoctorDTO> doctorsDTO = doctorService.findAll().stream()
-//                .map(doctorMapper::map)
-//                .toList();
-//        log.info("Doctors: {}", doctorsDTO);
-//        Map<SpecialtyDTO, List<DoctorDTO>> specialtyToDoctors = doctorsDTO.stream()
-//                .collect(Collectors.groupingBy(DoctorDTO::getSpecialty));
-//        log.info("Specialty to doctors: {}", specialtyToDoctors);
-//
+        Map<String, ?> data = prepareNecessaryData(patient);
+        return new ModelAndView("patient_appointment", data);
+//        model.addAttribute("appointmentsDTO", appointments);
 //        model.addAttribute("specialtiesDTO", specialtiesDTO);
 //        model.addAttribute("specialtyToDoctors", specialtyToDoctors);
-//
-//        Appointment appointment = appointmentMapper.map(appointmentDTO);
-//        log.info("Appointment: {}", appointment);
-//        //appointmentService.save(appointment);
-//        return "redirect:/patient/patient_appointment";
-//
-//    }
+//        model.addAttribute("appointmentDTO", new AppointmentDTO());
+//        return "patient_appointment";
+    }
+
+    @PostMapping(value = PATIENT_APPOINTMENT)
+    public String makeAppointment(
+            @Valid @ModelAttribute("appointmentDTO") AppointmentDTO appointmentDTO,
+            BindingResult result,
+            ModelMap model
+    ) {
+        if (result.hasErrors()) {
+            return "patient_appointment"; // or whatever your view name is
+        }
+
+
+        Appointment appointment = appointmentMapper.map(appointmentDTO);
+        log.info("Appointment: {}", appointment);
+        //appointmentService.save(appointment);
+        return "redirect:/patient/patient_appointment";
+
+    }
 
     private Patient getPatient(Principal principal) {
         ClinicUser clinicUser = userService.findByUserName(principal.getName());
@@ -112,5 +101,31 @@ public class PatientController {
         return patient;
     }
 
+    private Map<String, ?> prepareNecessaryData(Patient patient) {
+        List<AppointmentDTO> appointments = appointmentService.findByPatientId(patient.getPatientId()).stream()
+                .map(appointmentMapper::map)
+                .toList();
+        List<SpecialtyDTO> specialtiesDTO = specialtyService.findAll().stream()
+                .map(specialtyMapper::map)
+                .toList();
+        List<DoctorDTO> doctorsDTO = doctorService.findAll().stream()
+                .map(doctorMapper::map)
+                .toList();
+
+        Map<String, List<DoctorDTO>> specialtyToDoctors = new HashMap<>();
+        doctorsDTO.forEach(doctorDTO -> doctorDTO.getSpecialties()
+                .forEach(specialtyDTO -> specialtyToDoctors
+                        .computeIfAbsent(specialtyDTO.getName(), k -> new ArrayList<>())
+                        .add(doctorDTO)
+                )
+        );
+
+        return Map.of(
+                "appointmentsDTO", appointments,
+                "specialtiesDTO", specialtiesDTO,
+                "specialtyToDoctors", specialtyToDoctors,
+                "appointmentDTO", AppointmentDTO.builder().appointmentDate(OffsetDateTime.now()).build()
+        );
+    }
 
 }

@@ -6,6 +6,7 @@ import org.mapstruct.ReportingPolicy;
 import pl.online_clinic_management.domain.*;
 import pl.online_clinic_management.infrastructure.database.entity.AddressEntity;
 import pl.online_clinic_management.infrastructure.database.entity.DoctorEntity;
+import pl.online_clinic_management.infrastructure.database.entity.SpecialtyEntity;
 import pl.online_clinic_management.infrastructure.security.ClinicUserEntity;
 import pl.online_clinic_management.infrastructure.security.RoleEntity;
 
@@ -16,7 +17,23 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DoctorEntityMapper {
 
-    Doctor mapFromEntity(DoctorEntity entity);
+    default Doctor mapFromEntity(DoctorEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Doctor.DoctorBuilder doctor = Doctor.builder();
+
+        doctor.doctorId(entity.getDoctorId());
+        doctor.firstName(entity.getFirstName());
+        doctor.lastName(entity.getLastName());
+        doctor.specialties(mapSpecialtyEntityToSpecialty(entity.getSpecialties()));
+        doctor.clinicUser(mapClinicUserEntityToClinicUser(entity.getUser()));
+
+        return doctor.build();
+    }
+
+    Set<Specialty> mapSpecialtyEntityToSpecialty(Set<SpecialtyEntity> specialties);
 
     default Doctor mapFromObjectArray(List<Object[]> queryResults){
         var doctorEntity = (DoctorEntity) queryResults.get(0)[0];
@@ -62,6 +79,20 @@ public interface DoctorEntityMapper {
         return Role.builder()
                 .roleId(roleEntity.getId())
                 .roleName(roleEntity.getRoleName())
+                .build();
+    }
+
+    private ClinicUser mapClinicUserEntityToClinicUser(ClinicUserEntity user) {
+        return ClinicUser.builder()
+                .id(user.getId())
+                .userName(user.getUserName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .active(user.getActive())
+                .address(mapAddressEntityToAddress(user.getAddress()))
+                .role(user.getRoles().stream()
+                        .map(this::mapRoleEntityToRole)
+                        .collect(Collectors.toSet()))
                 .build();
     }
 }

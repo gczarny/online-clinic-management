@@ -12,4 +12,7 @@ CREATE TABLE doctor_specialty
 );
 
 insert into doctor_specialty (doctor_id, specialty_id)
-values (1, 1);
+values (1, 1),
+       (1, 2),
+       (2, 1),
+       (3, 3);

@@ -2,8 +2,8 @@ package pl.online_clinic_management.domain;
 
 import lombok.*;
 
-import java.sql.Date;
 import java.sql.Time;
+import java.util.Date;
 
 @With
 @Value

@@ -31,7 +31,7 @@ public class DoctorService {
 
     public List<Doctor> findAll() {
         List<Doctor> doctors = doctorDAO.findAll();
-        log.info("Available parts: [{}]", doctors);
+        log.info("Found doctors: [{}]", doctors);
         return doctors;
     }
 }
