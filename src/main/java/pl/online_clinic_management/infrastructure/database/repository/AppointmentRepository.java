@@ -1,6 +1,7 @@
 package pl.online_clinic_management.infrastructure.database.repository;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import pl.online_clinic_management.business.dao.AppointmentDAO;
 import pl.online_clinic_management.domain.Appointment;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @AllArgsConstructor
 @Repository
 public class AppointmentRepository implements AppointmentDAO {
@@ -25,8 +27,7 @@ public class AppointmentRepository implements AppointmentDAO {
     @Override
     public List<Appointment> findByPatientId(Long patientId) {
 
-        Optional<AppointmentEntity> patient = appointmentJpaRepository.findByPatient_PatientId(patientId);
-        return patient.stream()
+        return appointmentJpaRepository.findByPatient_PatientId(patientId).stream()
                 .map(mapper::mapFromEntity)
                 .collect(Collectors.toList());
     }
@@ -47,6 +48,13 @@ public class AppointmentRepository implements AppointmentDAO {
                 .stream()
                 .map(mapper::mapFromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Appointment save(Appointment appointment) {
+        log.info("Saving appointment in repository: [{}]", appointment);
+        AppointmentEntity appointmentEntity = appointmentJpaRepository.saveAndFlush(mapper.mapToEntity(appointment));
+        return mapper.mapFromEntity(appointmentEntity);
     }
 
 }

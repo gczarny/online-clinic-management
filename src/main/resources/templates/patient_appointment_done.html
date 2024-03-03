@@ -14,10 +14,10 @@
             <h2>You made an appointment!</h2>
             <p>Here are the details:
                 <b>
-                    <span th:if="${customerName}" th:text="${customerName}">SPECIALTY</span>
-                    <span th:if="${customerSurame}" th:text="${customerSurame}">DOCTOR</span>
-                    <span th:if="${existingCustomerEmail}" th:text="${existingCustomerEmail}">DATE TIME</span>
-                    <span th:if="${existingCustomerEmail}" th:text="${existingCustomerEmail}">REASON</span>
+                    <span th:if="${appointmentId}" th:text="${appointmentId}">ID</span>
+                    <span th:if="${appointmentDate}" th:text="${appointmentDate}">DATE</span>
+                    <span th:if="${appointmentStatus}" th:text="${appointmentStatus}">STATUS</span>
+                    <span th:if="${appointmentReason}" th:text="${appointmentReason}">REASON</span>
                 </b>
             </p>
         </div>

@@ -39,4 +39,10 @@ public class AppointmentService {
 
         return appointments;
     }
+
+    @Transactional
+    public Appointment save(Appointment appointment) {
+        log.info("Saving appointment: [{}]", appointment);
+        return appointmentDAO.save(appointment);
+    }
 }

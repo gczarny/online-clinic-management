@@ -15,4 +15,5 @@ public interface AppointmentDAO {
 
     List<Appointment> findByDoctorIdAndDate(Long doctorId, LocalDateTime date);
 
+    Appointment save(Appointment appointment);
 }

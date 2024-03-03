@@ -9,8 +9,8 @@ import java.util.Set;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "appointmentId")
-@ToString(of = {"appointmentId", "appointmentDate", "status", "reason"})
+@EqualsAndHashCode(of = {"appointmentId", "reason"})
+@ToString(of = {"appointmentId", "appointmentDate", "status", "reason", "patient", "doctor"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

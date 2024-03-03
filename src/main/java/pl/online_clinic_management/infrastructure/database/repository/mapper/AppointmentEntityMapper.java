@@ -1,5 +1,6 @@
 package pl.online_clinic_management.infrastructure.database.repository.mapper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,43 @@ public interface AppointmentEntityMapper {
                 .build();
     }
 
+    AppointmentEntity mapToEntity(Appointment appointment);
+
+//    default AppointmentEntity mapToEntity(Appointment appointment) {
+//        AppointmentEntity build = AppointmentEntity.builder()
+//                //.appointmentId(appointment.getAppointmentId())
+//                .appointmentDate(appointment.getAppointmentDate())
+//                .status(appointment.getStatus())
+//                .reason(appointment.getReason())
+//                .patient(mapPatientToPatientEntity(appointment.getPatient()))
+//                .doctor(mapDoctorToDoctorEntity(appointment.getDoctor()))
+//                .build();
+//        return build;
+//    }
+
+    private DoctorEntity mapDoctorToDoctorEntity(Doctor doctor) {
+        if (Objects.nonNull(doctor)) {
+            return DoctorEntity.builder()
+                    .doctorId(doctor.getDoctorId())
+                    .firstName(doctor.getFirstName())
+                    .lastName(doctor.getLastName())
+                    .build();
+        }
+        return null;
+    }
+
+    private PatientEntity mapPatientToPatientEntity(Patient patient) {
+        if (Objects.nonNull(patient)) {
+            return PatientEntity.builder()
+                    .patientId(patient.getPatientId())
+                    .firstName(patient.getFirstName())
+                    .lastName(patient.getLastName())
+                    .pesel(patient.getPesel())
+                    .build();
+        }
+        return null;
+    }
+
     private Patient mapPatientEntityToPatient(PatientEntity patientEntity) {
         if (Objects.nonNull(patientEntity)) {
             return Patient.builder()
@@ -58,4 +96,6 @@ public interface AppointmentEntityMapper {
     }
 
     Set<Specialty> mapSpecialtyEntityToSpecialty(Set<SpecialtyEntity> specialties);
+
+
 }

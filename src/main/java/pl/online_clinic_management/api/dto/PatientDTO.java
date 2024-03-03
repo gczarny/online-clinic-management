@@ -16,6 +16,6 @@ public class PatientDTO {
     private String firstName;
     private String lastName;
     private String pesel;
-    private ClinicUser clinicUser;
+    private ClinicUserDTO clinicUser;
 
 }

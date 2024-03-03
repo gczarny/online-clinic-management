@@ -16,10 +16,7 @@ import pl.online_clinic_management.api.dto.*;
 import pl.online_clinic_management.api.dto.mapper.*;
 import pl.online_clinic_management.business.*;
 import pl.online_clinic_management.business.dao.AppointmentDAO;
-import pl.online_clinic_management.domain.Appointment;
-import pl.online_clinic_management.domain.ClinicUser;
-import pl.online_clinic_management.domain.DoctorAvailability;
-import pl.online_clinic_management.domain.Patient;
+import pl.online_clinic_management.domain.*;
 import pl.online_clinic_management.infrastructure.security.OnlineClinicManagementUserDetailsService;
 
 import java.security.Principal;
@@ -55,55 +52,63 @@ public class PatientController {
 
     @GetMapping(value = PATIENT)
     public String homePage(Principal principal, Model model) {
-        Patient patient = getPatient(principal);
-        PatientDTO patientDTO = patientMapper.map(patient);
+        PatientDTO patient = getPatient(principal);
+        //PatientDTO patientDTO = patientMapper.map(patient);
 
-        model.addAttribute("patientDTO", patientDTO);
+        model.addAttribute("patientDTO", patient);
         return "patient_portal";
     }
 
     @GetMapping(value = PATIENT_APPOINTMENT)
-    public ModelAndView appointmentPage(Principal principal, Model model) {
-        Patient patient = getPatient(principal);
+    public ModelAndView appointmentPage(Principal principal) {
+        PatientDTO patient = getPatient(principal);
         Map<String, ?> data = prepareNecessaryData(patient);
         return new ModelAndView("patient_appointment", data);
     }
 
     @PostMapping(value = PATIENT_APPOINTMENT)
     public String makeAppointment(
-            @Valid @ModelAttribute("appointmentDTO") AppointmentDTO appointmentDTO,
+            Principal principal,
+            @ModelAttribute("appointmentDTO") AppointmentDTO appointmentDTO,
+            @RequestParam("dateSelect") String appointmentDateStr,
+            @RequestParam("hourSelect") String appointmentTimeStr,
+            @RequestParam("doctorId") String doctorId,
+            @RequestParam("reason") String reason,
             BindingResult result,
             ModelMap model
     ) {
         if (result.hasErrors()) {
-            return "patient_appointment"; // or whatever your view name is
+            return "error";
         }
-
-
+        String[] parts = appointmentTimeStr.split(" - ");
+        String startTimeStr = parts[0];
+        String dateTimeStr = appointmentDateStr + "T" + startTimeStr;
+        LocalDateTime appointmentDateTime = LocalDateTime.parse(dateTimeStr);
+        appointmentDTO.setDoctor(doctorMapper.map(doctorService.findById(Long.parseLong(doctorId))));
+        appointmentDTO.setAppointmentDate(appointmentDateTime);
+        appointmentDTO.setPatient(getPatient(principal));
+        appointmentDTO.setStatus("SCHEDULED");
+        appointmentDTO.setReason(reason);
+        log.info("Appointment DTO: {}", appointmentDTO);
         Appointment appointment = appointmentMapper.map(appointmentDTO);
         log.info("Appointment: {}", appointment);
-        //appointmentService.save(appointment);
-        return "redirect:/patient/patient_appointment";
+        Appointment newAppointment = appointmentService.save(appointment);
+        log.info("newAppointment: {}", newAppointment);
+        model.addAttribute("appointmentId", newAppointment.getAppointmentId());
+        model.addAttribute("appointmentDate", newAppointment.getAppointmentDate());
+        model.addAttribute("appointmentStatus", newAppointment.getStatus());
+        model.addAttribute("appointmentReason", newAppointment.getReason());
+        return "patient_appointment_done";
     }
 
-/*    @ResponseBody
-    @GetMapping("/patient/{doctorId}/available-slots")
-    public List<String> getDoctorAvailabilities(
-            @PathVariable Long doctorId,
-            @RequestParam(name = "datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime
-    ) {
-        List<String> availableTimeSlotsForDoctor = doctorAvailabilityService.getAvailableTimeSlotsForDoctor(doctorId, dateTime);
-        log.info("Available time slots for doctor: {}", availableTimeSlotsForDoctor);
-        return availableTimeSlotsForDoctor;
-    }*/
-
-    private Patient getPatient(Principal principal) {
+    private PatientDTO getPatient(Principal principal) {
         ClinicUser clinicUser = userService.findByUserName(principal.getName());
         Patient patient = patientService.getPatientInfo(clinicUser.getId());
-        return patient;
+
+        return patientMapper.map(patient);
     }
 
-    private Map<String, ?> prepareNecessaryData(Patient patient) {
+    private Map<String, ?> prepareNecessaryData(PatientDTO patient) {
         List<AppointmentDTO> appointmentsDTO = appointmentService.findByPatientId(patient.getPatientId()).stream()
                 .map(appointmentMapper::map)
                 .toList();

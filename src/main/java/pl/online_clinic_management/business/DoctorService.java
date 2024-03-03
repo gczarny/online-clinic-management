@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.online_clinic_management.api.dto.DoctorDTO;
+import pl.online_clinic_management.api.dto.mapper.DoctorMapper;
 import pl.online_clinic_management.business.dao.DoctorDAO;
 import pl.online_clinic_management.domain.Doctor;
 import pl.online_clinic_management.domain.Patient;
@@ -33,5 +35,9 @@ public class DoctorService {
         List<Doctor> doctors = doctorDAO.findAll();
         log.info("Found doctors: [{}]", doctors);
         return doctors;
+    }
+
+    public Doctor findById(Long id) {
+        return doctorDAO.findById(id).orElseThrow();
     }
 }

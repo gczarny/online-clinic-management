@@ -105,37 +105,42 @@
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <form id="appointmentForm">
+                            <form id="appointmentForm" action="#" th:action="@{/patient/patient_appointment}" method="post">
                                 <h2>Make an Appointment!</h2>
                                 <div class="form-group mb-3">
                                     <label for="specialtySelect">Specialization</label>
                                     <select class="form-control" id="specialtySelect" onchange="updateDoctors()">
                                         <option value="">Select Specialization</option>
                                         <th:block th:each="specialtyEntry : ${specialtyWithDoctors.entrySet()}">
-                                            <option th:value="${specialtyEntry.key}" th:text="${specialtyEntry.key}"></option>
+                                            <option th:value="${specialtyEntry.key}" th:text="${specialtyEntry.key}">
+                                            </option>
                                         </th:block>
                                     </select>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="doctorSelect">Doctor</label>
-                                    <select class="form-control" id="doctorSelect" onchange="updateDates()">
+                                    <select class="form-control" id="doctorSelect" name="doctorId" onchange="updateDates()">
                                         <option value="">Select Doctor</option>
                                         <!-- Doctors will be populated by JavaScript -->
                                     </select>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="dateSelect">Date</label>
-                                    <select class="form-control" id="dateSelect" onchange="updateAvailableHoursFromForm()">
+                                    <select class="form-control" id="dateSelect" name="dateSelect" onchange="updateAvailableHoursFromForm()">
                                         <option value="">Select Date</option>
                                         <!-- Dates will be populated by JavaScript -->
                                     </select>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="hourSelect">Available Hours</label>
-                                    <select class="form-control" id="hourSelect">
+                                    <select class="form-control" id="hourSelect" name="hourSelect">
                                         <option value="">Select Hour</option>
                                         <!-- Hours will be populated by JavaScript -->
                                     </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="reason">Reason</label>
+                                    <input type="text" class="form-control" id="reason" name="reason">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Submit</button>
                             </form>
