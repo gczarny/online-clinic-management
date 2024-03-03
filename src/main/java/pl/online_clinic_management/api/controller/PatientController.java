@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,11 +67,6 @@ public class PatientController {
         Patient patient = getPatient(principal);
         Map<String, ?> data = prepareNecessaryData(patient);
         return new ModelAndView("patient_appointment", data);
-//        model.addAttribute("appointmentsDTO", appointments);
-//        model.addAttribute("specialtiesDTO", specialtiesDTO);
-//        model.addAttribute("specialtyToDoctors", specialtyToDoctors);
-//        model.addAttribute("appointmentDTO", new AppointmentDTO());
-//        return "patient_appointment";
     }
 
     @PostMapping(value = PATIENT_APPOINTMENT)
@@ -90,7 +86,7 @@ public class PatientController {
         return "redirect:/patient/patient_appointment";
     }
 
-    @ResponseBody
+/*    @ResponseBody
     @GetMapping("/patient/{doctorId}/available-slots")
     public List<String> getDoctorAvailabilities(
             @PathVariable Long doctorId,
@@ -99,7 +95,7 @@ public class PatientController {
         List<String> availableTimeSlotsForDoctor = doctorAvailabilityService.getAvailableTimeSlotsForDoctor(doctorId, dateTime);
         log.info("Available time slots for doctor: {}", availableTimeSlotsForDoctor);
         return availableTimeSlotsForDoctor;
-    }
+    }*/
 
     private Patient getPatient(Principal principal) {
         ClinicUser clinicUser = userService.findByUserName(principal.getName());
@@ -111,27 +107,29 @@ public class PatientController {
         List<AppointmentDTO> appointmentsDTO = appointmentService.findByPatientId(patient.getPatientId()).stream()
                 .map(appointmentMapper::map)
                 .toList();
-        log.info("AppointmentsDTO: {}", appointmentsDTO);
 
         List<SpecialtyDTO> specialtiesDTO = specialtyService.findAll().stream()
                 .map(specialtyMapper::map)
                 .toList();
-        log.info("SpecialtiesDTO: {}", specialtiesDTO);
 
         List<DoctorDTO> doctorsDTO = doctorService.findAll().stream()
                 .map(doctorMapper::map)
                 .toList();
-        log.info("DoctorsDTO: {}", doctorsDTO);
 
         Map<String, List<DoctorDTO>> specialtyToDoctors = new HashMap<>();
-        doctorsDTO.forEach(doctorDTO -> doctorDTO.getSpecialties()
-                .forEach(specialtyDTO -> specialtyToDoctors
-                        .computeIfAbsent(specialtyDTO.getName(), k -> new ArrayList<>())
-                        .add(doctorDTO)
-                )
+        doctorsDTO.forEach(doctorDTO ->
+                doctorDTO.getSpecialties()
+                        .forEach(specialtyDTO ->
+                                specialtyToDoctors
+                                        .computeIfAbsent(specialtyDTO.getName(), k -> new ArrayList<>())
+                                        .add(doctorDTO)
+                        )
         );
+        log.info("Specialty to doctors: {}", specialtyToDoctors);
+
         Map<Long, List<DoctorAvailabilityDTO>> doctorToAvailabilities = new HashMap<>();
         Map<Long, List<String>> doctorToAvailableDates = new HashMap<>();
+
         doctorsDTO.forEach(doctorDTO -> {
             List<DoctorAvailability> availabilities = doctorAvailabilityService.findAvailableTimesForDoctor(doctorDTO.getDoctorId());
             List<DoctorAvailabilityDTO> availabilityDTOS = availabilities.stream()
@@ -144,57 +142,73 @@ public class PatientController {
                 LocalDate start = availabilitiesDTO.getDateRangeStart();
                 LocalDate end = availabilitiesDTO.getDateRangeEnd();
                 List<LocalDate> dates = Stream.iterate(start, date -> date.isBefore(end), date -> date.plusDays(1))
-                        .collect(Collectors.toList());
-                // Łączymy daty do ciągu znaków ze względu na ograniczenia Thymeleaf
-                availableDates.addAll(dates.stream().map(LocalDate::toString).collect(Collectors.toList()));
+                        .toList();
+                availableDates.addAll(dates.stream().map(LocalDate::toString).toList());
             });
             doctorToAvailableDates.put(doctorDTO.getDoctorId(), availableDates);
         });
-        log.info("Doctor to availabilities: {}", doctorToAvailabilities);
-        log.info("Doctor to available datetimes: {}", doctorToAvailableDates);
 
         Map<Long, DoctorDTO> doctorDTOMap = doctorsDTO.stream()
                 .collect(Collectors.toMap(DoctorDTO::getDoctorId, doctorDTO -> doctorDTO));
-        log.info("Doctor DTO map: {}", doctorDTOMap);
 
-        Map<String, List<DoctorDTO>> specialtyWithUniqueDoctors = new HashMap<>();
+        Map<DoctorDTO,  Map<LocalDate, List<String>>> doctorToAvailableTimeSlots = new HashMap<>();
+        doctorsDTO.forEach(doctorDTO -> {
+            Map<LocalDate, List<String>> availableTimeSlots = new HashMap<>();
+            List<String> availableDates = doctorToAvailableDates.get(doctorDTO.getDoctorId());
+            availableDates.forEach(date -> {
+                LocalDate localDate = LocalDate.parse(date);
+                Map<LocalDate, List<String>> availableTimeSlotsForDate = doctorAvailabilityService.getAvailableTimeSlotsForDoctor(doctorDTO.getDoctorId(), localDate, localDate);
+                availableTimeSlots.putAll(availableTimeSlotsForDate);
+            });
+            doctorToAvailableTimeSlots.put(doctorDTO, availableTimeSlots);
+        });
+        log.info("Doctor to available time slots: {}", doctorToAvailableTimeSlots);
+
+        //now make a map, key as map of specialties with doctor, and values as map of available time slots
+        Map<Map<String, List<DoctorDTO>>, Map<LocalDate, List<String>>> specialtyToDoctorsWithAvailableTimeSlots = new HashMap<>();
         specialtyToDoctors.forEach((specialty, doctors) -> {
-            List<DoctorDTO> uniqueDoctors = doctors.stream()
-                    .distinct()
-                    .collect(Collectors.toList());
-            specialtyWithUniqueDoctors.put(specialty, uniqueDoctors);
+            Map<LocalDate, List<String>> availableTimeSlots = new HashMap<>();
+            doctors.forEach(doctor -> {
+                Map<LocalDate, List<String>> availableTimeSlotsForDoctor = doctorToAvailableTimeSlots.get(doctor);
+                availableTimeSlots.putAll(availableTimeSlotsForDoctor);
+            });
+            specialtyToDoctorsWithAvailableTimeSlots.put(Map.of(specialty, doctors), availableTimeSlots);
         });
-        log.info("Specialty with unique doctors: {}", specialtyWithUniqueDoctors);
+        log.info("Specialty to doctors with available time slots: {}", specialtyToDoctorsWithAvailableTimeSlots);
 
-        //display doctor availbility getHalfHourTimeSlots()
-        doctorToAvailabilities.forEach((doctorId, doctorAvailabilities) -> {
-            doctorAvailabilities.forEach(doctorAvailabilityDTO -> {
-                log.info("Doctor availability: {}", doctorAvailabilityDTO);
-                log.info("Half hour time slots: {}", doctorAvailabilityDTO.getHalfHourTimeSlots());
+        List<SpecialtyDoctorAvailabilityDTO> availabilityDTOList = new ArrayList<>();
+        specialtyToDoctorsWithAvailableTimeSlots.forEach((specialtyDoctorsMap, timeSlots) -> {
+            specialtyDoctorsMap.forEach((specialty, doctors) -> {
+                doctors.forEach(doctor -> {
+                    timeSlots.forEach((date, hours) -> {
+                        SpecialtyDoctorAvailabilityDTO dto = new SpecialtyDoctorAvailabilityDTO(specialty, doctor, date, hours);
+                        availabilityDTOList.add(dto);
+                    });
+                });
             });
         });
 
-        Map<Long, List<String>> doctorToAvailableTimeslots = new HashMap<>();
-        doctorToAvailabilities.forEach((doctorId, doctorAvailabilities) -> {
-            List<String> availableTimeslots = new ArrayList<>();
-            doctorAvailabilities.forEach(doctorAvailabilityDTO -> {
-                List<String> timeslots = doctorAvailabilityDTO.getHalfHourTimeSlots();
-                // Zamieniamy timeslots na napisy
-                availableTimeslots.addAll(timeslots);
-            });
-            doctorToAvailableTimeslots.put(doctorId, availableTimeslots);
+        Map<String, SpecialtyWithDoctorsDTO> specialtyWithDoctors = new HashMap<>();
+
+        specialtyToDoctors.forEach((specialty, doctors) -> {
+            List<DoctorWithDatesDTO> doctorWithDatesDTOs = doctors.stream().map(doctor -> {
+                Map<LocalDate, List<String>> availableTimeSlots = doctorToAvailableTimeSlots.get(doctor);
+                return new DoctorWithDatesDTO(doctor, availableTimeSlots);
+            }).collect(Collectors.toList());
+
+            specialtyWithDoctors.put(specialty, new SpecialtyWithDoctorsDTO(specialty, doctorWithDatesDTOs));
         });
-        log.info("Doctor to available timeslots: {}", doctorToAvailableTimeslots);
+        log.info("Specialty with doctors: {}", specialtyWithDoctors);
 
         return Map.of(
                 "appointmentsDTO", appointmentsDTO,
                 "specialtiesDTO", specialtiesDTO,
-                "specialtyWithUniqueDoctors", specialtyWithUniqueDoctors,
+                "specialtyWithUniqueDoctors", specialtyToDoctors,
                 "appointmentDTO", AppointmentDTO.builder().appointmentDate(LocalDateTime.now()).build(),
-                "doctorToAvailabilities", doctorToAvailableDates,
                 "doctorDTOMap", doctorDTOMap,
-                "doctorToAvailableTimeslots", doctorToAvailableTimeslots
-
+                "doctorToAvailableTimeSlots", doctorToAvailableTimeSlots,
+                "availabilityDTOList", availabilityDTOList,
+                "specialtyWithDoctors", specialtyWithDoctors
         );
     }
 

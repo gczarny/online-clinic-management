@@ -50,22 +50,22 @@
             <div class="col-md-10">
                 <div class="container-fluid">
                     <div class="row mt-3">
-                        <table class="table">
+                        <table class="table table-bordered">
                             <thead class="table-dark">
-                            <tr>
-                                <th>Appointment Date</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                                <th>Doctor</th>
-                            </tr>
+                                <tr>
+                                    <th scope="col">Appointment Date</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Reason</th>
+                                    <th scope="col">Doctor</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="appointment : ${appointmentsDTO}">
-                                <td th:text="${appointment.appointmentDate}"></td>
-                                <td th:text="${appointment.status}"></td>
-                                <td th:text="${appointment.reason}"></td>
-                                <td th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}"></td>
-                            </tr>
+                                <tr th:each="appointment : ${appointmentsDTO}">
+                                    <td th:text="${appointment.appointmentDate}"></td>
+                                    <td th:text="${appointment.status}"></td>
+                                    <td th:text="${appointment.reason}"></td>
+                                    <td th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}"></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -74,35 +74,29 @@
                             <h2>Doctor Availability</h2>
                             <table class="table table-bordered">
                                 <thead>
-                                <tr>
-                                    <th>Specialization</th>
-                                    <th>Doctor</th>
-                                    <th>Date</th>
-                                    <th>Available Hours</th>
-                                </tr>
+                                    <tr>
+                                        <th>Specialization</th>
+                                        <th>Doctor</th>
+                                        <th>Date</th>
+                                        <th>Available Hours</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <th:block th:each="specialty : ${specialtyWithUniqueDoctors.keySet()}">
-                                    <tr th:each="doctor, stat : ${specialtyWithUniqueDoctors.get(specialty)}">
-                                        <td th:if="${stat.index == 0}" th:rowspan="${#lists.size(specialtyWithUniqueDoctors.get(specialty))}" th:text="${specialty}"></td>
-                                        <td th:if="${doctor != null}" th:text="${doctor.firstName} + ' ' + ${doctor.lastName}"></td>
+                                <th:block th:each="specialtyEntry : ${specialtyWithDoctors.entrySet()}">
+                                    <tr th:each="doctorWithDates : ${specialtyEntry.value.doctors}">
+                                        <td th:if="${doctorWithDatesStat.index == 0}" th:rowspan="${specialtyEntry.value.doctors.size()}" th:text="${specialtyEntry.key}"></td>
+                                        <td th:text="${doctorWithDates.doctor.firstName} + ' ' + ${doctorWithDates.doctor.lastName}"></td>
                                         <td>
-                                            <ul th:if="${doctorToAvailabilities[doctor.doctorId] != null}">
-                                                <li th:each="dateStr : ${doctorToAvailabilities[doctor.doctorId]}">
-                                                    <span th:text="${dateStr}"></span>
-                                                </li>
-                                            </ul>
+                                            <select th:id="'date-' + ${doctorWithDates.doctor.doctorId}" th:attr="onchange=|updateAvailableHours('${doctorWithDates.doctor.doctorId}')|">
+                                                <option th:each="dateEntry : ${doctorWithDates.availableTimeSlots.entrySet()}"
+                                                        th:value="${dateEntry.key}"
+                                                        th:data-hours="${#strings.listJoin(dateEntry.value, ',')}"
+                                                        th:text="${dateEntry.key}">
+                                                </option>
+                                            </select>
                                         </td>
-                                        <td>
-                                            <ul th:if="${doctorToAvailabilities[doctor.doctorId] != null}">
-                                                <li th:each="availability : ${doctorToAvailabilities[doctor.doctorId]}">
-                                                    <ul>
-                                                        <li th:each="slot : ${doctorToAvailableTimeslots[doctor.doctorId]}">
-                                                            <span th:text="${slot}"></span>
-                                                        </li>
-                                                    </ul>
-                                                </li>
-                                            </ul>
+                                        <td th:id="'availableHours_' + ${doctorWithDates.doctor.doctorId}">
+                                            <!-- JS will update this based on selected date -->
                                         </td>
                                     </tr>
                                 </th:block>
@@ -112,110 +106,108 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-<!--                            <form action="#" th:action="@{/patient/patient_appointment}" method="post"
-                                  th:object="${appointmentDTO}">
-                                <h2>Make an appointment!</h2>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="appointmentDate">Appointment Date:</label>
-                                        <input type="datetime-local" id="appointmentDate" th:field="*{appointmentDate}">
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="reason">Reason:</label>
-                                        <input type="text" id="reason" th:field="*{reason}">
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="specialty">Specialty</label>
-                                        <select id="specialty">
-                                            <option th:each="specialty : ${specialtiesDTO}" th:value="${specialty.name}"
-                                                    th:text="${specialty.name}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="specialty">Choose a doctor</label>
-                                        <select id="doctor" th:field="*{doctor.doctorId}">
-                                            <option th:each="doctor : ${doctorDTO}" th:value="${doctor.doctorId}"
-                                                    th:text="${doctor.firstName} + ' ' + ${doctor.lastName}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <button type="submit" class="btn btn-primary">Make an appointment</button>
-                                    </div>
-                                </div>
-                            </form>
+                            <!--                            <form action="#" th:action="@{/patient/patient_appointment}" method="post"
+                                                              th:object="${appointmentDTO}">
+                                                            <h2>Make an appointment!</h2>
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-6">
+                                                                    <label for="appointmentDate">Appointment Date:</label>
+                                                                    <input type="datetime-local" id="appointmentDate" th:field="*{appointmentDate}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-6">
+                                                                    <label for="reason">Reason:</label>
+                                                                    <input type="text" id="reason" th:field="*{reason}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-6">
+                                                                    <label for="specialty">Specialty</label>
+                                                                    <select id="specialty">
+                                                                        <option th:each="specialty : ${specialtiesDTO}" th:value="${specialty.name}"
+                                                                                th:text="${specialty.name}"></option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-6">
+                                                                    <label for="specialty">Choose a doctor</label>
+                                                                    <select id="doctor" th:field="*{doctor.doctorId}">
+                                                                        <option th:each="doctor : ${doctorDTO}" th:value="${doctor.doctorId}"
+                                                                                th:text="${doctor.firstName} + ' ' + ${doctor.lastName}"></option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-3">
+                                                                <div class="col-md-6">
+                                                                    <button type="submit" class="btn btn-primary">Make an appointment</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <ul th:each="doctorEntry : ${doctorToAvailabilities}">
+                                                            <li>
+                                                                <span th:text="${doctorDTOMap[doctorEntry.key].firstName} + ' ' + ${doctorDTOMap[doctorEntry.key].lastName}"></span>
+                                                                <ul th:each="availability : ${doctorEntry.value}">
+                                                                    <li th:text="${availability.dateRangeStart} + ' - ' + ${availability.dateRangeEnd}"></li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </div>-->
                         </div>
-                        <div class="col-md-6">
-                            <ul th:each="doctorEntry : ${doctorToAvailabilities}">
-                                <li>
-                                    <span th:text="${doctorDTOMap[doctorEntry.key].firstName} + ' ' + ${doctorDTOMap[doctorEntry.key].lastName}"></span>
-                                    <ul th:each="availability : ${doctorEntry.value}">
-                                        <li th:text="${availability.dateRangeStart} + ' - ' + ${availability.dateRangeEnd}"></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>-->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    document.getElementById('appointmentDate').value = new Date().toISOString().slice(0, 16);
-</script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    $(document).ready(function () {
-        var updateDoctorsDropdown = function () {
-            var selectedSpecialty = $('#specialty').val();
-            var specialtyDoctorsMap = /*[[${specialtyWithUniqueDoctors}]]*/;
-            var doctors = specialtyDoctorsMap[selectedSpecialty];
-            $('#doctor').empty();
-            $.each(doctors, function (index, doctor) {
-                $('#doctor').append(new Option(doctor.firstName + ' ' + doctor.lastName, doctor.doctorId));
-            });
-        };
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--<script th:inline="javascript">-->
+    <!--    /*<![CDATA[*/-->
+    <!--    $(document).ready(function () {-->
+    <!--        var updateDoctorsDropdown = function () {-->
+    <!--            var selectedSpecialty = $('#specialty').val();-->
+    <!--            var specialtyDoctorsMap = /*[[${specialtyWithUniqueDoctors}]]*/;-->
+    <!--            var doctors = specialtyDoctorsMap[selectedSpecialty];-->
+    <!--            $('#doctor').empty();-->
+    <!--            $.each(doctors, function (index, doctor) {-->
+    <!--                $('#doctor').append(new Option(doctor.firstName + ' ' + doctor.lastName, doctor.doctorId));-->
+    <!--            });-->
+    <!--        };-->
 
-        $('#specialty').change(updateDoctorsDropdown);
+    <!--        $('#specialty').change(updateDoctorsDropdown);-->
 
-        // Call the function to update doctors dropdown on page load
-        updateDoctorsDropdown();
-    });
-    /*]]>*/
-</script>
-<!--<script>
-    $(document).ready(function() {
-        $('#doctor').change(function() {
-            var doctorId = $(this).val();
-            var selectedDateTime = $('#appointmentDate').val();  // get the selected date
-
-            $.ajax({
-                url: '/online_clinic_management/patient/' + doctorId + '/available-slots',
-                type: 'GET',
-                data: { datetime: selectedDateTime },  // pass the selected date to our API
-                success: function(data) {
-                    console.log("Received available time slots: ", data);
-
-                    // data now contains an array of strings, we can directly set the input value.
-                    $('#appointmentDate').val(data[0]);
-                    console.log("Assigned datetime: ", $('#appointmentDate').val());
-                }
+    <!--        // Call the function to update doctors dropdown on page load-->
+    <!--        updateDoctorsDropdown();-->
+    <!--    });-->
+    <!--    /*]]>*/-->
+    <!--</script>-->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Iteracja przez wszystkie elementy select dla dat
+            document.querySelectorAll('select[id^="date-"]').forEach(function(selectElement) {
+                const doctorId = selectElement.id.replace('date-', '');
+                updateAvailableHours(doctorId); // Wywołanie funkcji aktualizującej dla domyślnej daty
             });
         });
 
-        // Trigger the change event to update the input upon page load
-        $("#doctor").trigger("change");
-    });
-</script>-->
+        function updateAvailableHours(doctorId) {
+            const selectElement = document.getElementById(`date-${doctorId}`);
+            if (!selectElement) {
+                console.error(`Select element not found for doctorId: ${doctorId}`);
+                return;
+            }
 
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const availableHoursString = selectedOption.getAttribute('data-hours');
+            const availableHours = availableHoursString ? availableHoursString.split(',') : [];
+
+            const availableHoursElement = document.getElementById(`availableHours_${doctorId}`);
+            if (availableHoursElement) {
+                availableHoursElement.innerHTML = availableHours.map(hour => `<div>${hour}</div>`).join('');
+            }
+        }
+    </script>
 </body>
 </html>

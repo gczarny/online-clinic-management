@@ -47,15 +47,15 @@ VALUES (1, 'Janusz', 'Testowy', '21345678911', 1),
        (4, 'Jan', 'Kowalski', '12345378911', 4);
 
 INSERT INTO doctor_availability (available_from, available_until, date_range_start, date_range_end, status, doctor_id)
-VALUES ('08:00', '12:00', '2023-03-01', '2023-04-27', 'AVAILABLE', 1),
-       ('06:00', '14:00', '2023-03-15', '2023-04-15', 'AVAILABLE', 2),
-       ('10:00', '17:00', '2023-02-27', '2023-03-29', 'AVAILABLE', 3);
+VALUES ('08:00', '12:00', '2024-03-01', '2024-04-27', 'AVAILABLE', 1),
+       ('06:00', '14:00', '2024-03-15', '2024-04-15', 'AVAILABLE', 2),
+       ('10:00', '17:00', '2024-02-27', '2024-03-29', 'AVAILABLE', 3);
 
 INSERT INTO appointment (appointment_id, appointment_date, status, reason, patient_id, doctor_id)
-VALUES (1, '2023-03-15 09:00:00+00', 'SCHEDULED', 'Routine checkup', 1, 1),
-       (2, '2023-03-16 09:00:00+00', 'SCHEDULED', 'Sick', 2, 1),
-       (3, '2023-03-22 09:00:00+00', 'CANCELLED', 'Routine checkup', 3, 2),
-       (4, '2023-03-18 09:00:00+00', 'DONE', 'Routine checkup', 4, 3);
+VALUES (1, '2024-03-15 09:00:00+00', 'SCHEDULED', 'Routine checkup', 1, 1),
+       (2, '2024-03-16 09:00:00+00', 'SCHEDULED', 'Sick', 2, 1),
+       (3, '2024-03-22 09:00:00+00', 'CANCELLED', 'Routine checkup', 3, 2),
+       (4, '2024-03-18 09:00:00+00', 'DONE', 'Routine checkup', 4, 3);
 
 INSERT INTO medical_note (content, appointment_id)
 VALUES ('', 1),
@@ -65,5 +65,5 @@ VALUES ('', 1),
 
 
 /*INSERT INTO patient_history (date, notes, patient_id)
-VALUES ('2023-03-16', 'Cold, medication taken', 4);*/
+VALUES ('2024-03-16', 'Cold, medication taken', 4);*/
 

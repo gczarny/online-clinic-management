@@ -24,16 +24,13 @@
                         <ul class="nav flex-column">
                             <h1 class="m-2">Welcome <span th:text="${patientDTO.firstName}">First name</span> <span th:text="${patientDTO.lastName}">Last name</span></h1>
                             <li class="nav-item mb-2">
-                                <a class="nav-link btn btn-info" th:href="@{/patient/patient_appointment}" role="button">Appointments</a>
+                                <a class="nav-link btn btn-info" th:href="@{/doctor/doctor_appointment}" role="button">Appointments</a>
                             </li>
                             <li class="nav-item mb-2">
-                                <a class="nav-link btn btn-info" th:href="@{/patient_user_information}" role="button">User Information</a>
+                                <a class="nav-link btn btn-info" th:href="@{/doctor/doctor_user_information}" role="button">User Information</a>
                             </li>
                             <li class="nav-item mb-2">
-                                <a class="nav-link btn btn-info" th:href="@{/patient_medical_history}" role="button">Medical History</a>
-                            </li>
-                            <li class="nav-item mb-2">
-                                <a class="nav-link btn btn-info" th:href="@{/patient_appointment_notes}" role="button">Appointment Notes</a>
+                                <a class="nav-link btn btn-info" th:href="@{/doctor/my_patients}" role="button">Medical History</a>
                             </li>
                             <li class="nav-item mb-2">
                                 <a th:href="@{/}" class="nav-link btn btn-info" role="button">Go back to the main page</a>

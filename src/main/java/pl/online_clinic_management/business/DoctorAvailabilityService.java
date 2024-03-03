@@ -14,9 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,13 +30,11 @@ public class DoctorAvailabilityService {
     @Transactional
     public List<DoctorAvailability> findByDoctorId(Long doctorId) {
         List<DoctorAvailability> doctorAvailabilities = doctorAvailabilityDAO.findByDoctorId(doctorId);
-        log.info("Found for doctor availabilities: [{}]", doctorAvailabilities.size());
         return doctorAvailabilities;
     }
     @Transactional
     public List<DoctorAvailability> findByDoctorIdAndDateRangeStartBetween(Long doctorId, LocalDate dateFrom, LocalDate dateTo) {
         List<DoctorAvailability> doctorAvailabilities = doctorAvailabilityDAO.findByDoctorIdAndDateRangeStartBetween(doctorId, dateFrom, dateTo);
-        log.info("Found for doctor availabilities: [{}], between: [{}] - [{}]", doctorAvailabilities.size(), dateFrom, dateTo);
         return doctorAvailabilities;
     }
 
@@ -56,14 +52,46 @@ public class DoctorAvailabilityService {
     }
 
     @Transactional
-    public List<String> getAvailableTimeSlotsForDoctor(Long doctorId, LocalDateTime dateTime) {
-        LocalDate date = dateTime.toLocalDate();
-        log.info("Getting available time slots for doctor id:{} at date:{}", doctorId, dateTime);
-        List<DoctorAvailability> availabilities = findAvailableTimesForDoctor(doctorId);
-        log.info("Found availabilities: {}, for doctor id:{}", availabilities, doctorId);
+    public Map<LocalDate, List<String>> getAvailableTimeSlotsForDoctor(Long doctorId, LocalDate startDate, LocalDate endDate) {
+        List<DoctorAvailability> availabilities = findByDoctorIdAndDateRangeStartBetween(doctorId, startDate, endDate);
         List<Appointment> appointments = appointmentService.findByDoctorId(doctorId);
-        log.info("Found appointments: {}, for doctor id:{} at date:{}", appointments, doctorId, dateTime);
-        return getAvailableTimeSlots(availabilities, appointments, date);
+
+        Map<LocalDate, List<String>> availableTimeSlotsByDate = new TreeMap<>();
+
+        for (DoctorAvailability availability : availabilities) {
+            LocalDate current = availability.getDateRangeStart();
+            LocalDate end = availability.getDateRangeEnd().plusDays(1); // Uwzględnij również ostatni dzień
+
+            while (!current.isAfter(end)) {
+                final LocalDate date = current;
+                List<String> availableTimeSlots = new ArrayList<>();
+                LocalTime from = availability.getAvailableFrom();
+                LocalTime until = availability.getAvailableUntil();
+
+                while (from.isBefore(until)) {
+                    String potentialSlot = from.toString();
+                    boolean slotOccupied = appointments.stream()
+                            .anyMatch(appointment ->
+                                    appointment.getAppointmentDate().toLocalDate().isEqual(date) &&
+                                            appointment.getAppointmentDate().toLocalTime().equals(LocalTime.parse(potentialSlot))
+                            );
+
+                    if (!slotOccupied) {
+                        availableTimeSlots.add(potentialSlot + " - " + from.plusMinutes(30).toString());
+                    }
+
+                    from = from.plusMinutes(30);
+                }
+
+                if (!availableTimeSlots.isEmpty()) {
+                    availableTimeSlotsByDate.put(date, availableTimeSlots);
+                }
+
+                current = current.plusDays(1);
+            }
+        }
+
+        return availableTimeSlotsByDate;
     }
 
     private List<DoctorAvailability> splitAvailabilityExcludingDayOffs(DoctorAvailability availability, List<DayOff> dayOffs) {
@@ -99,11 +127,9 @@ public class DoctorAvailabilityService {
         List<String> availableTimeSlots = new ArrayList<>();
 
         for (DoctorAvailability availability : availabilities) {
-            log.info("Checking date: {} is between availability start date: {} and end date: {}", date, availability.getDateRangeStart(), availability.getDateRangeEnd());
             if ((availability.getDateRangeStart().isEqual(date) || availability.getDateRangeStart().isBefore(date))
                     && (availability.getDateRangeEnd().isEqual(date) || availability.getDateRangeEnd().isAfter(date))
             ) {
-                log.info("Date is in range");
                 LocalTime from = availability.getAvailableFrom();
                 LocalTime until = availability.getAvailableUntil();
 
@@ -119,8 +145,6 @@ public class DoctorAvailabilityService {
                     }
                     from = from.plusMinutes(30);  // or whatever interval you want
                 }
-            } else {
-                log.info("Date is not in range");
             }
         }
         return availableTimeSlots;

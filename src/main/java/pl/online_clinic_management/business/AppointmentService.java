@@ -31,13 +31,12 @@ public class AppointmentService {
     public List<Appointment> findByDoctorId(Long doctorId) {
         List<Appointment> appointments = appointmentDAO.findByDoctorId(doctorId);
 
-        log.info("Found for doctors appointments: [{}]", appointments.size());
         return appointments;
     }
 
     public List<Appointment> findByDoctorIdAndDate(Long doctorId, LocalDateTime date) {
         List<Appointment> appointments = appointmentDAO.findByDoctorIdAndDate(doctorId, date);
-        log.info("Found for doctor appointments: [{}]", appointments.size());
+
         return appointments;
     }
 }
