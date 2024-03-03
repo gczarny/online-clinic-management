@@ -50,8 +50,8 @@
             <div class="col-md-10">
                 <div class="container-fluid">
                     <div class="row mt-3">
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
+                        <table class="table table-success table-hover table-bordered">
+                            <thead>
                                 <tr>
                                     <th scope="col">Appointment Date</th>
                                     <th scope="col">Status</th>
@@ -69,6 +69,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <br><br>
                     <div class="row">
                         <div class="col-md-6">
                             <h2>Doctor Availability</h2>
@@ -103,59 +104,41 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6">
-                            <!--                            <form action="#" th:action="@{/patient/patient_appointment}" method="post"
-                                                              th:object="${appointmentDTO}">
-                                                            <h2>Make an appointment!</h2>
-                                                            <div class="row mt-3">
-                                                                <div class="col-md-6">
-                                                                    <label for="appointmentDate">Appointment Date:</label>
-                                                                    <input type="datetime-local" id="appointmentDate" th:field="*{appointmentDate}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mt-3">
-                                                                <div class="col-md-6">
-                                                                    <label for="reason">Reason:</label>
-                                                                    <input type="text" id="reason" th:field="*{reason}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mt-3">
-                                                                <div class="col-md-6">
-                                                                    <label for="specialty">Specialty</label>
-                                                                    <select id="specialty">
-                                                                        <option th:each="specialty : ${specialtiesDTO}" th:value="${specialty.name}"
-                                                                                th:text="${specialty.name}"></option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mt-3">
-                                                                <div class="col-md-6">
-                                                                    <label for="specialty">Choose a doctor</label>
-                                                                    <select id="doctor" th:field="*{doctor.doctorId}">
-                                                                        <option th:each="doctor : ${doctorDTO}" th:value="${doctor.doctorId}"
-                                                                                th:text="${doctor.firstName} + ' ' + ${doctor.lastName}"></option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mt-3">
-                                                                <div class="col-md-6">
-                                                                    <button type="submit" class="btn btn-primary">Make an appointment</button>
-                                                                </div>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <ul th:each="doctorEntry : ${doctorToAvailabilities}">
-                                                            <li>
-                                                                <span th:text="${doctorDTOMap[doctorEntry.key].firstName} + ' ' + ${doctorDTOMap[doctorEntry.key].lastName}"></span>
-                                                                <ul th:each="availability : ${doctorEntry.value}">
-                                                                    <li th:text="${availability.dateRangeStart} + ' - ' + ${availability.dateRangeEnd}"></li>
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>-->
+                            <form id="appointmentForm">
+                                <h2>Make an Appointment!</h2>
+                                <div class="form-group mb-3">
+                                    <label for="specialtySelect">Specialization</label>
+                                    <select class="form-control" id="specialtySelect" onchange="updateDoctors()">
+                                        <option value="">Select Specialization</option>
+                                        <th:block th:each="specialtyEntry : ${specialtyWithDoctors.entrySet()}">
+                                            <option th:value="${specialtyEntry.key}" th:text="${specialtyEntry.key}"></option>
+                                        </th:block>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="doctorSelect">Doctor</label>
+                                    <select class="form-control" id="doctorSelect" onchange="updateDates()">
+                                        <option value="">Select Doctor</option>
+                                        <!-- Doctors will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="dateSelect">Date</label>
+                                    <select class="form-control" id="dateSelect" onchange="updateAvailableHoursFromForm()">
+                                        <option value="">Select Date</option>
+                                        <!-- Dates will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="hourSelect">Available Hours</label>
+                                    <select class="form-control" id="hourSelect">
+                                        <option value="">Select Hour</option>
+                                        <!-- Hours will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -163,26 +146,6 @@
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!--<script th:inline="javascript">-->
-    <!--    /*<![CDATA[*/-->
-    <!--    $(document).ready(function () {-->
-    <!--        var updateDoctorsDropdown = function () {-->
-    <!--            var selectedSpecialty = $('#specialty').val();-->
-    <!--            var specialtyDoctorsMap = /*[[${specialtyWithUniqueDoctors}]]*/;-->
-    <!--            var doctors = specialtyDoctorsMap[selectedSpecialty];-->
-    <!--            $('#doctor').empty();-->
-    <!--            $.each(doctors, function (index, doctor) {-->
-    <!--                $('#doctor').append(new Option(doctor.firstName + ' ' + doctor.lastName, doctor.doctorId));-->
-    <!--            });-->
-    <!--        };-->
-
-    <!--        $('#specialty').change(updateDoctorsDropdown);-->
-
-    <!--        // Call the function to update doctors dropdown on page load-->
-    <!--        updateDoctorsDropdown();-->
-    <!--    });-->
-    <!--    /*]]>*/-->
-    <!--</script>-->
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             // Iteracja przez wszystkie elementy select dla dat
@@ -208,6 +171,72 @@
                 availableHoursElement.innerHTML = availableHours.map(hour => `<div>${hour}</div>`).join('');
             }
         }
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var specialtyWithDoctors = [[${specialtyWithDoctors}]]; // Ensure this is correctly passed
+
+        function updateDoctors() {
+            var specialty = document.getElementById("specialtySelect").value;
+            var doctorSelect = document.getElementById("doctorSelect");
+            doctorSelect.innerHTML = '<option value="">Select Doctor</option>'; // Reset
+
+            if (specialty) {
+                var doctors = specialtyWithDoctors[specialty].doctors;
+                doctors.forEach(function(doctor) {
+                    var option = new Option(doctor.doctor.firstName + ' ' + doctor.doctor.lastName, doctor.doctor.doctorId);
+                    doctorSelect.add(option);
+                });
+            }
+
+            updateDates(); // Reset subsequent dropdowns
+        }
+
+        function updateDates() {
+            var doctorId = document.getElementById("doctorSelect").value;
+            var dateSelect = document.getElementById("dateSelect");
+            dateSelect.innerHTML = '<option value="">Select Date</option>'; // Reset
+
+            if (doctorId) {
+                var selectedSpecialty = document.getElementById("specialtySelect").value;
+                var doctors = specialtyWithDoctors[selectedSpecialty].doctors;
+                var selectedDoctor = doctors.find(function(doctor) {
+                    return doctor.doctor.doctorId.toString() === doctorId;
+                });
+
+                if (selectedDoctor) {
+                    Object.keys(selectedDoctor.availableTimeSlots).forEach(function(date) {
+                        var option = new Option(date, date);
+                        dateSelect.add(option);
+                    });
+                }
+            }
+
+            updateAvailableHoursFromForm(); // Reset hours dropdown
+        }
+
+        function updateAvailableHoursFromForm() {
+            var doctorId = document.getElementById("doctorSelect").value;
+            var selectedDate = document.getElementById("dateSelect").value;
+            var hourSelect = document.getElementById("hourSelect");
+            hourSelect.innerHTML = '<option value="">Select Hour</option>'; // Reset
+
+            if (doctorId && selectedDate) {
+                var selectedSpecialty = document.getElementById("specialtySelect").value;
+                var doctors = specialtyWithDoctors[selectedSpecialty].doctors;
+                var selectedDoctor = doctors.find(function(doctor) {
+                    return doctor.doctor.doctorId.toString() === doctorId;
+                });
+
+                if (selectedDoctor && selectedDoctor.availableTimeSlots[selectedDate]) {
+                    selectedDoctor.availableTimeSlots[selectedDate].forEach(function(hour) {
+                        var option = new Option(hour, hour);
+                        hourSelect.add(option);
+                    });
+                }
+            }
+        }
+        /*]]>*/
     </script>
 </body>
 </html>
